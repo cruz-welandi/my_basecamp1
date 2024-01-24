@@ -44,7 +44,7 @@ app.use('/api', authRoutes);
 app.use('/views/assets', express.static('views/assets'));
 app.listen(port, () => {
 
-  console.log(`Le serveur tourne sur le port ${port}`);
+  console.log(`Le serveur tourne sur le port ${port} \n http://localhost:5000/views \n`);
 
   process.on('SIGINT', () => {
     dbModels.close((err) => {
