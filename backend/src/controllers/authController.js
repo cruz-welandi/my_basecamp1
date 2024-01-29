@@ -157,8 +157,24 @@ function isValidEmail(email) {
 }
 
 
+// route pour la déconnexion (sign out)
+const signOut = async (req, res) => {
+    try {
+        // Vous pouvez simplement ne rien faire ici car le jeton JWT est stocké côté client
+        // L'invalidation d'un jeton JWT est généralement gérée côté client en supprimant le jeton stocké
+
+        // Envoyez une réponse appropriée pour indiquer que la déconnexion est réussie
+        return res.status(200).json({ message: "Déconnexion réussie." });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Erreur interne du serveur.' });
+    }
+};
+
+
 module.exports = {
     login,
     register,
     updateUser,
+    signOut,
 };
