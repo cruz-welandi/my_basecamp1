@@ -3,6 +3,7 @@ const cors = require('cors');
 //const auth = require('../middleware/auth');
 const bodyParser = require('body-parser');
 const authRoutes = require('./src/routes/authRoutes');
+const projetRoute = require('./src/routes/projetRouter');
 const viewsRouter = require('./src/routes/viewsRoutes');
 const dbModels = require('./src/models/dbModels');
 const app = express();
@@ -40,6 +41,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/api', authRoutes);
+app.use('/api', projetRoute);
 
 app.use('/views/assets', express.static('views/assets'));
 app.listen(port, () => {
