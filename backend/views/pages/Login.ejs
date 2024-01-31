@@ -8,20 +8,57 @@
 </head>
 <body>
     <div class="flex flex-col items-center ">
-            <img src="/views/assets/logo.png" alt="logo">
-            <span class="font-bold text-2xl flex py-5 ">
-                Login
-            </span>
+        <img src="/views/assets/logo.png" alt="logo">
+        <span class="font-bold text-2xl flex py-5 ">
+            Login
+        </span>
         <form id="loginForm" class="">
             <div class="flex flex-col gap-2">
                 <label class="text-xl ">Email</label>
-                <input type="email" name="email" id="email" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
+                <input type="email" name="Email" id="Email" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
                 <label class="text-xl ">Password </label>
-                <input type="password" name="password" id="Password" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
+                <input type="password" name="Password" id="Password" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
                 <a href="/views/password-forgot"><i class="text-[#021AF6] ml-[60%] py-2">Forgot password</i></a>
             </div>
-            <button class="bg-[#02A9F6] rounded-lg text-white text-xl px-4 py-2 ml-[80px] my-3">Connexion</button>
+            <button type="submit" class="bg-[#02A9F6] rounded-lg text-white text-xl px-4 py-2 ml-[80px] my-3">Connexion</button>
         </form>
     </div>
+
+    <script>
+        // Récupérer le formulaire
+        const loginForm = document.getElementById("loginForm");
+
+        // Ajouter un gestionnaire d'événement pour l'événement de soumission du formulaire
+        loginForm.addEventListener('submit', async(event) => {
+            event.preventDefault(); // Empêcher le comportement par défaut du formulaire
+
+            // Récupérer les valeurs des champs de formulaire
+            const   Email = document.getElementById('Email').value;
+            const Password = document.getElementById('Password').value;
+
+            try {
+                // Envoyer une requête POST à l'API pour la connexion
+                const response = await fetch('http://localhost:5000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ Email, Password })
+                });
+
+                // Vérifier le code de statut de la réponse
+                if (response.ok) {
+                    // Rediriger l'utilisateur vers une autre page après la connexion réussie, par exemple
+                    window.location.href = '/views/Projet';
+                } else {
+                    const responseData = await response.json();
+                    alert("Erreur lors de la connexion : " + responseData.message);
+                }
+            } catch (error) {
+                console.error("Erreur lors de la requête :", error);
+                alert("Erreur lors de la connexion. Veuillez réessayer.");
+            }
+        });
+    </script>
 </body>
 </html>

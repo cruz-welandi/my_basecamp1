@@ -74,6 +74,9 @@
                 document.getElementById('Email').value = '';
                 document.getElementById('Password').value = '';
                 document.getElementById('confirmPassword').value = '';
+
+                
+                window.location.href = '/views/login';
             }  else {
                     const responseData = await response.json();
                     alert("Erreur lors de l'inscription : " + responseData.message);

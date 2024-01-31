@@ -21,12 +21,12 @@ viewsRouter.get('/register', (req, res) => {
 });
 
 //view projets
-viewsRouter.get('/create-projet', (req, res) => {
+viewsRouter.get('/projet', (req, res) => {
     res.render('Projet', { title: 'create projet'});
 });
 
 //view new-project
-viewsRouter.get('/new-projet', (req, res) => {
+viewsRouter.get('/createProjet', (req, res) => {
     res.render('New-projet', { title: 'new-projet'});
 });
 
