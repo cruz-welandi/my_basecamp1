@@ -7,25 +7,20 @@ const login = async (req, res) => {
     try {
         const { Email, Password } = req.body;
 
-        // Make sure there is an Email and Password in the request
+        // Assurez-vous qu'il y a un Email et un Password dans la requête
         if (!(Email && Password)) {
-            return res.status(400).send("all input is required");
+            return res.status(400).send("Tous les champs sont requis");
         }
 
-        // Use a Promise-based approach to make the code more readable
+        // Utilisez une approche basée sur les promesses pour rendre le code plus lisible
         const user = await new Promise((resolve, reject) => {
             const sql = "SELECT * FROM Users WHERE Email = ?";
-            dbModels.all(sql, Email, (err, rows) => {
+            dbModels.get(sql, [Email], (err, row) => {
                 if (err) {
                     reject(err);
-                    return;  // Ajoutez cette ligne pour éviter de résoudre la promesse après le rejet
+                    return;
                 }
-
-                if (rows.length === 0) {
-                    resolve(null);  // Utilisateur non trouvé, résoudre avec null
-                } else {
-                    resolve(rows[0]);
-                }
+                resolve(row);
             });
         });
 
@@ -33,30 +28,32 @@ const login = async (req, res) => {
             return res.status(400).send("Utilisateur non trouvé");
         }
 
-        // Use bcrypt.compare as a Promise
+        // Vérifiez si les identifiants sont valides en utilisant bcrypt.compare
         const validCredentials = await bcrypt.compare(Password, user.Password);
 
         if (!validCredentials) {
-            return res.status(400).send("Invalid credentials");
+            return res.status(400).send("Identifiants invalides");
         }
 
-        console.log("Token Key:", process.env.TOKEN_KEY);
-        // Créer le jeton JWT ici
+        console.log("Clé du jeton :", process.env.TOKEN_KEY);
+        // Créez le jeton JWT ici
         const token = jwt.sign(
             { user_id: user.Id, username: user.Username, Email },
             process.env.TOKEN_KEY,
             { expiresIn: "1h" }
         );
 
-        user.Token = token;
+        // Définir le cookie dans la réponse
+        res.cookie('userToken', token, {
+            maxAge: 3600000, // Durée de vie du cookie en millisecondes (1 heure)
+            httpOnly: true // Le cookie ne peut être accédé que par le serveur, pas par JavaScript côté client
+        });
 
         return res.status(200).json({
-            user:{
-                Id : user.Id,
+            user: {
+                Id: user.Id,
                 Username: user.Username,
                 Email: user.Email,
-                Salt: user.Salt,
-                Token: user.Token,
                 DateLoggedIn: user.DateLoggedIn,
                 DateCreated: user.DateCreated
             }

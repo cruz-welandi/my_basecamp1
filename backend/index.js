@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 //const auth = require('../middleware/auth');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const authRoutes = require('./src/routes/authRoutes');
 const projetRoute = require('./src/routes/projetRouter');
 const viewsRouter = require('./src/routes/viewsRoutes');
@@ -39,6 +40,7 @@ app.use(cors());
 
 // Middleware pour analyser le corps des requêtes au format URL encodé
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use('/api', authRoutes);
 app.use('/api', projetRoute);

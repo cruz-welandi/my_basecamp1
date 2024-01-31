@@ -1,8 +1,13 @@
 const dbModels = require('../models/dbModels');
 
 const addProjet = async (req, res) => {
+    const token = req.cookies.token;
     const { NameProjet, desProjet } = req.body;
-    const creatorId = req.user.id; // Supposons que vous ayez une propriété user dans la requête contenant l'ID de l'utilisateur actuel
+
+    if (!token) {
+        return res.status(401).send("Token non fourni. Accès non autorisé.");
+    }
+    const creatorId = req.cookies.user_id; // Supposons que vous ayez une propriété user dans la requête contenant l'ID de l'utilisateur actuel
 
     try {
         if (!NameProjet || !desProjet) {
@@ -62,7 +67,12 @@ const updateProjet = async (req, res) => {
 };
 
 const listProject = async (req, res) => {
+    const token = req.cookies.token;
     const userId = req.user.id; // Supposons que vous ayez une propriété user dans la requête contenant l'ID de l'utilisateur actuel
+
+    if (!token) {
+        return res.status(401).send("Token non fourni. Accès non autorisé.");
+    }
 
     try {
         // Sélectionnez tous les projets créés par l'utilisateur
@@ -82,8 +92,14 @@ const listProject = async (req, res) => {
 
 
 const addUserToProject = async (req, res) => {
+    const token = req.cookies.token;
     const { Email, projectId, Role } = req.body;
-    const userId = req.user.id; // Supposons que vous ayez une propriété user dans la requête contenant l'ID de l'utilisateur actuel
+
+    if (!token) {
+        return res.status(401).send("Token non fourni. Accès non autorisé.");
+    }
+
+    const userId = req.cookies.user_id; // Supposons que vous ayez une propriété user dans la requête contenant l'ID de l'utilisateur actuel
 
     try {
         // Vérifiez si l'utilisateur effectuant l'ajout est un administrateur
