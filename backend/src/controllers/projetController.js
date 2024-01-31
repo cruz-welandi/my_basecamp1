@@ -36,14 +36,24 @@ const updateProjet = async (req, res) => {
     const { NameProjet, desProjet } = req.body;
 
     try {
+        // Validation des données
         if (!id || !NameProjet || !desProjet) {
             return res.status(400).json({ message: "L'identifiant du projet, le nom et la description du projet sont requis pour la mise à jour." });
         }
 
+        // Mise à jour du projet
+        const currentDate = new Date().toISOString(); // Date actuelle
         const sql = `UPDATE Projets SET NameProjet = ?, desProjet = ?, DateCreated = ? WHERE id = ?`;
-        const params = [NameProjet, desProjet, new Date().toISOString(), id];
+        const params = [NameProjet, desProjet, currentDate, id];
 
         await dbModels.run(sql, params);
+
+        // Vérification de l'effet de la mise à jour
+        const updatedRows = this.changes;
+        if (updatedRows === 0) {
+            return res.status(404).json({ message: "Aucun projet trouvé avec l'identifiant spécifié." });
+        }
+
         return res.status(200).json({ message: "Le nom et la description du projet ont été mis à jour avec succès." });
     } catch (error) {
         console.error(error);
