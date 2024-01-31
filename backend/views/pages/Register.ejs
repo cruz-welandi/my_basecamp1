@@ -67,9 +67,14 @@
                 });
 
                 // Vérifier le code de statut de la réponse
-                if (response.ok) {
-                    alert("Inscription réussie !");
-                } else {
+            if (response.ok) {
+                alert("Inscription réussie !");
+                // Réinitialiser les valeurs des champs du formulaire à une chaîne vide
+                document.getElementById('Username').value = '';
+                document.getElementById('Email').value = '';
+                document.getElementById('Password').value = '';
+                document.getElementById('confirmPassword').value = '';
+            }  else {
                     const responseData = await response.json();
                     alert("Erreur lors de l'inscription : " + responseData.message);
                 }
