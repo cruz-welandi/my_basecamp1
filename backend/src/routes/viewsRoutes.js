@@ -30,4 +30,14 @@ viewsRouter.get('/createProjet', (req, res) => {
     res.render('New-projet', { title: 'new-projet'});
 });
 
+//view edit-project
+viewsRouter.get('/editProjet', (req, res) => {
+    res.render('Edit-project', { title: 'Edit-project'});
+});
+
+//view profil
+viewsRouter.get('/profil', (req, res) => {
+    res.render('profil', { title: 'profil'});
+});
+
 module.exports = viewsRouter;

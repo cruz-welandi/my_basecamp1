@@ -132,15 +132,34 @@ const register = async (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
-        const userId = req.params.userId;
+        const userId = req.cookies.user_id; // Assurez-vous que c'est la manière correcte de récupérer l'ID utilisateur.
         const { Username, Email, Password } = req.body;
 
         // Vérifier si l'utilisateur a le droit de mettre à jour ces informations
-        if (req.user.id !== parseInt(userId)) {
+        if (req.cookies.user_id !== parseInt(userId)) {
             return res.status(403).json({ message: 'Vous n\'avez pas le droit de mettre à jour cet utilisateur.' });
         }
 
-        // Le reste du code pour mettre à jour l'utilisateur...
+        // Validation des données
+        if (!Username || !Email || (Password && !isValidEmail(Email))) {
+            return res.status(400).json({ message: 'Données invalides.' });
+        }
+
+        // Hash du nouveau mot de passe si fourni
+        let newPassword = Password ? bcrypt.hashSync(Password, 10) : undefined;
+
+        // Mise à jour dans la base de données
+        let updateSql = `UPDATE Users SET Username = ?, Email = ?${newPassword ? ', Password = ?' : ''} WHERE Id = ?`;
+        let params = [Username, Email];
+        if (newPassword) params.push(newPassword);
+        params.push(userId);
+
+        dbModels.run(updateSql, params, function (err) {
+            if (err) {
+                return res.status(500).json({ message: err.message });
+            }
+            return res.status(200).json({ message: 'Mise à jour réussie.' });
+        });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Erreur interne du serveur.' });
@@ -157,10 +176,9 @@ function isValidEmail(email) {
 // route pour la déconnexion (sign out)
 const signOut = async (req, res) => {
     try {
-        // Vous pouvez simplement ne rien faire ici car le jeton JWT est stocké côté client
-        // L'invalidation d'un jeton JWT est généralement gérée côté client en supprimant le jeton stocké
+        // Supprimez le cookie si vous le gérez côté serveur
+        res.clearCookie('userToken');
 
-        // Envoyez une réponse appropriée pour indiquer que la déconnexion est réussie
         return res.status(200).json({ message: "Déconnexion réussie." });
     } catch (error) {
         console.error(error);
