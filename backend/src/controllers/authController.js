@@ -132,14 +132,21 @@ const register = async (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
-        const userId = req.cookies.user_id; // Assurez-vous que c'est la manière correcte de récupérer l'ID utilisateur.
-        const { Username, Email, Password } = req.body;
+        const token = req.cookies.userToken;
+        console.log("Token reçu!"); // Pour vérifier le token reçu
 
-        // Vérifier si l'utilisateur a le droit de mettre à jour ces informations
-        if (req.cookies.user_id !== parseInt(userId)) {
-            return res.status(403).json({ message: 'Vous n\'avez pas le droit de mettre à jour cet utilisateur.' });
+        if (!token) {
+            console.log("Aucun token fourni");
+            return res.status(401).send("Token non fourni. Accès non autorisé.");
         }
 
+        const decodedToken = jwt.decode(token);
+        console.log("Token décodé"); // Pour inspecter le token décodé
+        const userId = decodedToken ? decodedToken['user_id'] : null;
+
+        const { Username, Email, Password } = req.body;
+
+    
         // Validation des données
         if (!Username || !Email || (Password && !isValidEmail(Email))) {
             return res.status(400).json({ message: 'Données invalides.' });
