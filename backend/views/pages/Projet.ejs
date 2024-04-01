@@ -18,50 +18,69 @@
                 edit projet
                </a>
 
-               <a href="#" class="bg-gray-200 font-bold flex items-center px-2 py-2 gap-2 rounded-lg"><img src="/views/assets/Vector (1).png" alt="" class="w-[20px]">
-                Sign out
-               </a>
+               <a href="/views/profil" class="bg-gray-200 font-bold flex items-center px-4 py-2 gap-2 rounded-lg">Profil<img src="/views/assets/parametres-cog.png " class="w-[20px] " alt="Profil"></a>
 
             </div>
         </nav>
     
-      <div class="">
-        <span class="text-3xl font-bold flex pl-[40%] py-2">Projects</span>
-            <div class="flex justify-center gap-52 py-8"> 
-                <a href="#" class="bg-gray-200 font-bold flex items-center px-2 py-2 gap-2 rounded-lg"> <img src="/views/assets/Vector (2).png" class="w-[20px]">All projects</a>
-               <a href="#" class="bg-gray-200 font-bold flex items-center px-2 py-2 gap-2 rounded-lg"><img src="/views/assets/Vector (4).png" alt="" class="w-[20px]">
-                Created by me
-               </a>
-    
-                 <a href="#" class="bg-gray-200 font-bold flex items-center px-2 py-2 gap-2 rounded-lg"><img src="/views/assets/Vector (3).png" alt="" class="w-[20px]">
-                    Shared with me
-                </a>
-            </div>
-      </div>
+     <h1 class="text-3xl font-bold flex pl-[40%] py-2">Projects</h1>
 
+      <div class="flex flex-col gap-y-5 w-full px-8">
+        <div class="mt-8 flex flex-col gap-y-3">
+            <h2 class="text-2xl font-semibold">Projets Créés</h2>
+            <div id="userProjectsContainer" class="flex gap-x-3">
 
-      <div class="py-8 ml-[27.5%] w-72"> 
-        <div class="flex bg-black p-4 gap-6">
-            <div class="text-white">
-                <p class="font-bold text-xl">name of Project</p>
-                <p>user@gmail.com</p>
-            </div>
-            <div>
-                <a href="/views/editProjet">
-                    <img class="h-10" src="/views/assets/Vector (4).png" alt="">
-                </a>
             </div>
         </div>
-       
-       
-       
-        <a href="#" class="text-black p-4 h-20 text-2xl font-bold flex items-center px-2 py-2 gap-2 border-4 border-gray-200 rounded-lg"><img src="/views/assets/Vector (4).png" alt="" class="w-[20px]">
-            description
-       </a>
+        
+        <div class="mt-8 flex flex-col gap-y-3">
+            <h2 class="text-2xl font-semibold">Projets Partagés avec Moi</h2>
+            <div id="projectsAddedToContainer" class="flex gap-x-3">
 
-         <a href="#" class="bg-gray-200 font-bold flex items-center px-2 py-2 gap-2 rounded-lg h-14"><img src="logo" alt="" class="w-[20px]">
-            
-        </a>
-    </div>
+            </div>
+        </div>
+      </div>
+    <script>
+        async function fetchAndDisplayProjects() {
+            try {
+                const response = await fetch('http://localhost:5000/api/listProjet');
+                const { userProjects, projectsAddedTo } = await response.json();
+
+                // Sélecteur pour les conteneurs
+                const userProjectsContainer = document.getElementById('userProjectsContainer');
+                const projectsAddedToContainer = document.getElementById('projectsAddedToContainer');
+
+                // Mapper et afficher userProjects
+                userProjects.forEach(project => {
+                    const projectElement = document.createElement('div');
+                    projectElement.classList.add('p-4', 'mb-4', 'shadow', 'rounded-lg', 'bg-white'); // Tailwind classes
+                    projectElement.innerHTML = `
+                        <h3 class="text-lg font-bold">${project.nameProjet}</h3>
+                        <p>${project.desProjet}</p>
+                        <p class="text-sm text-gray-600">Créé par: ${project.Email}</p>
+                    `;
+                    userProjectsContainer.appendChild(projectElement);
+                });
+
+                // Mapper et afficher projectsAddedTo
+                projectsAddedTo.forEach(project => {
+                    const projectElement = document.createElement('div');
+                    projectElement.classList.add('p-4', 'mb-4', 'shadow', 'rounded-lg', 'bg-white'); // Tailwind classes
+                    projectElement.innerHTML = `
+                        <h3 class="text-lg font-bold">${project.nameProjet}</h3>
+                        <p>${project.desProjet}</p>
+                        <p class="text-sm text-gray-600">Créé par: ${project.Email}</p>
+                    `;
+                    projectsAddedToContainer.appendChild(projectElement);
+                });
+            } catch (error) {
+                console.error("Erreur lors de la récupération des données de l'API", error);
+                alert("Erreur interne du serveur");
+            }
+        }
+
+        // Appeler la fonction au chargement de la page
+        fetchAndDisplayProjects();
+    </script>
 </body>
 </html>

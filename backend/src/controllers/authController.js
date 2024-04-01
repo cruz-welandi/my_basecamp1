@@ -45,7 +45,7 @@ const login = async (req, res) => {
 
         // Définir le cookie dans la réponse
         res.cookie('userToken', token, {
-            maxAge: 3600000, // Durée de vie du cookie en millisecondes (1 heure)
+            maxAge: 9600000, // Durée de vie du cookie en millisecondes (1 heure)
             httpOnly: true // Le cookie ne peut être accédé que par le serveur, pas par JavaScript côté client
         });
 

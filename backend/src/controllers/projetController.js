@@ -1,55 +1,93 @@
 const dbModels = require('../models/dbModels');
+const jwt = require('jsonwebtoken');
 
 const addProjet = async (req, res) => {
-    const token = req.cookies.token;
-    const { NameProjet, desProjet } = req.body;
+    console.log("Début de la fonction addProjet"); // Pour confirmer l'entrée dans la fonction
+
+    const token = req.cookies.userToken;
+    console.log("Token reçu!"); // Pour vérifier le token reçu
 
     if (!token) {
+        console.log("Aucun token fourni");
         return res.status(401).send("Token non fourni. Accès non autorisé.");
     }
-    const creatorId = req.cookies.user_id; // Supposons que vous ayez une propriété user dans la requête contenant l'ID de l'utilisateur actuel
+
+    const decodedToken = jwt.decode(token);
+    console.log("Token décodé"); // Pour inspecter le token décodé
+
+    const { nameProjet, desProjet } = req.body;
+    console.log("Données reçues"); // Pour vérifier les données reçues
+
+    if (!nameProjet || !desProjet) {
+        console.log("Données requises manquantes");
+        return res.status(400).json({ message: "Le nom et la description du projet sont requis." });
+    }
+
+    const CreatorId = decodedToken ? decodedToken['user_id'] : null;
+    console.log("ID du créateur"); // Pour vérifier l'ID extrait du token
 
     try {
-        if (!NameProjet || !desProjet) {
-            return res.status(400).json({ message: "Le nom et la description du projet sont requis." });
-        }
+        const date = new Date();
+        const dateProjet = `${date.getFullYear()}:${date.getMonth() + 1}:${date.getDate()}`;
 
-        const sql = `INSERT INTO Projets (NameProjet, desProjet, CreatorId, DateCreated) VALUES (?, ?, ?, ?)`;
-        const params = [NameProjet, desProjet, creatorId, new Date().toISOString()];
+        const sql = "INSERT INTO Projets (nameProjet, desProjet, CreatorId, DateCreated) VALUES (?, ?, ?, ?)";
+        const params = [nameProjet, desProjet, CreatorId, dateProjet];
 
         await dbModels.run(sql, params, async function(err) {
             if (err) {
-                console.error(err);
-                return res.status(500).json({ message: "Erreur interne du serveur." });
+                console.error("Erreur lors de l'insertion dans la base de données:", err);
+                return res.status(500).json({ message: "Erreur interne du serveur 0." });
             }
 
             const projectId = this.lastID;
-            const adminSql = `INSERT INTO ProjetMembers (UserId, ProjetId, Role) VALUES (?, ?, ?)`;
-            const adminParams = [creatorId, projectId, 'admin'];
+            console.log("Projet ajouté avec succès, ID:", projectId); // Pour confirmer le succès de l'insertion
+
+            const adminSql = 'INSERT INTO ProjetMembers (UserId, ProjetId, Role) VALUES (?, ?, ?)';
+            const adminParams = [CreatorId, projectId, 'admin'];
+            console.log("Paramètres SQL pour ProjetMembers correcte"); // Avant d'ajouter le membre admin
 
             await dbModels.run(adminSql, adminParams);
+            console.log("Membre admin ajouté avec succès");
+
             return res.status(201).json({ message: "Le projet a été ajouté avec succès." });
         });
     } catch (error) {
-        console.error(error);
+        console.error("Erreur capturée dans addProjet:", error);
         return res.status(500).json({ message: "Erreur interne du serveur." });
     }
 };
 
 const updateProjet = async (req, res) => {
-    const { id } = req.params;
-    const { NameProjet, desProjet } = req.body;
+    console.log("Début de la fonction updateProjet");
+
+    const token = req.cookies.userToken;
+    console.log("Token reçu!"); 
+
+    if (!token) {
+        console.log("Aucun token fourni");
+        return res.status(401).send("Token non fourni. Accès non autorisé.");
+    }
+
+    const decodedToken = jwt.decode(token);
+    console.log("Token décodé"); // Pour inspecter le token décodé
+
+    const userId = decodedToken ? decodedToken['user_id'] : null;
+    console.log("ID du créateur"); // Pour vérifier l'ID extrait du token
+
+
+    const { nameProjet, desProjet, email, role } = req.body;
+    // Validation des données
+    if (!userId || !nameProjet || !desProjet || !email || !role){
+        return res.status(400).json({ message: "L'identifiant du projet, le nom et la description du projet sont requis pour la mise à jour." });
+    }
+    
 
     try {
-        // Validation des données
-        if (!id || !NameProjet || !desProjet) {
-            return res.status(400).json({ message: "L'identifiant du projet, le nom et la description du projet sont requis pour la mise à jour." });
-        }
-
         // Mise à jour du projet
-        const currentDate = new Date().toISOString(); // Date actuelle
-        const sql = `UPDATE Projets SET NameProjet = ?, desProjet = ?, DateCreated = ? WHERE id = ?`;
-        const params = [NameProjet, desProjet, currentDate, id];
+        const date = new Date();
+        const dateProjet = `${date.getFullYear()}:${date.getMonth() + 1}:${date.getDate()}`;
+        const sql = `UPDATE Projets SET nameProjet = ?, desProjet = ?, DateCreated = ? WHERE id = ?`;
+        const params = [nameProjet, desProjet, dateProjet, userId];
 
         await dbModels.run(sql, params);
 
@@ -66,24 +104,52 @@ const updateProjet = async (req, res) => {
     }
 };
 
-const listProject = async (req, res) => {
-    const token = req.cookies.token;
-    const userId = req.user.id; // Supposons que vous ayez une propriété user dans la requête contenant l'ID de l'utilisateur actuel
+const listProjet = async (req, res) => {
+    console.log("Début de la fonction listProjet");
+
+    const token = req.cookies.userToken;
+    console.log("Token reçu!", token); // Pour vérifier le token reçu
 
     if (!token) {
-        return res.status(401).send("Token non fourni. Accès non autorisé.");
+        console.log("Aucun token fourni");
+        return res.status(401).json({ message: "Token non fourni. Accès non autorisé." });
+    }
+
+    const decodedToken = jwt.decode(token);
+    console.log("Token décodé"); // Pour inspecter le token décodé
+
+    const userId = decodedToken ? decodedToken['user_id'] : null;
+    console.log("ID du créateur: ", userId); // Pour vérifier l'ID extrait du token
+
+    function runQuery(sql, params = []) {
+        return new Promise((resolve, reject) => {
+            dbModels.all(sql, params, (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
     }
 
     try {
-        // Sélectionnez tous les projets créés par l'utilisateur
-        const sql = `SELECT * FROM Projets WHERE CreatorId = ?`;
-        const userProjects = await dbModels.all(sql, [userId]);
+        // Sélectionnez le nom du projet, la description et l'email du créateur pour tous les projets créés par l'utilisateur
+        const sql = `SELECT Projets.nameProjet, Projets.desProjet, Users.Email 
+                     FROM Projets 
+                     JOIN Users ON Projets.CreatorId = Users.Id 
+                     WHERE Projets.CreatorId = ?`;
+        const userProjects = await runQuery(sql, [userId]);
 
-        // Sélectionnez tous les projets où l'utilisateur a été ajouté
-        const sql2 = `SELECT p.* FROM Projets p INNER JOIN ProjetMembers pm ON p.Id = pm.ProjetId WHERE pm.UserId = ?`;
-        const projectsAddedTo = await dbModels.all(sql2, [userId]);
+        // Sélectionnez le nom du projet, la description et l'email du créateur pour tous les projets où l'utilisateur a été ajouté
+        const sql2 = `SELECT Projets.nameProjet, Projets.desProjet, Users.Email 
+                      FROM Projets 
+                      JOIN ProjetMembers ON Projets.Id = ProjetMembers.ProjetId 
+                      JOIN Users ON Projets.CreatorId = Users.Id 
+                      WHERE ProjetMembers.UserId = ? AND Projets.CreatorId != ?`;
+        const projectsAddedTo = await runQuery(sql2, [userId]);
 
-        return res.status(200).json({ userProjects, projectsAddedTo });
+        return res.status(200).json({ userProjects, projectsAddedTo});
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: "Erreur interne du serveur." });
@@ -133,6 +199,6 @@ const addUserToProject = async (req, res) => {
 module.exports = {
     addProjet,
     updateProjet,
-    listProject,
+    listProjet,
     addUserToProject,
 };

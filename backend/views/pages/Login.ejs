@@ -49,7 +49,7 @@
                 // Vérifier le code de statut de la réponse
                 if (response.ok) {
                     // Rediriger l'utilisateur vers une autre page après la connexion réussie, par exemple
-                    window.location.href = '/views/Projet';
+                    window.location.href = '/views/home';
                 } else {
                     const responseData = await response.json();
                     alert("Erreur lors de la connexion : " + responseData.message);

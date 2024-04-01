@@ -8,7 +8,7 @@
 </head>
 <body>
   <nav class="flex py-3 justify-between px-5">
-    <a href="/views/Projet">
+    <a href="/views/home">
       <img class="w-[70px]" src="/views/assets/logo.png" alt="logo" >
     </a>        
         <div class="flex gap-5">
@@ -29,12 +29,13 @@
       <h1 class="my-3 text-3xl font-bold text-gray-700">New projet</h1>
     </div>
     <div>
-      <form action="" method="POST">
+      <form action="" method="POST" id="formProjet">
         <div class="mb-6">
           <label for="name" class="block mb-2 text-xl"
             >Name</label
           >
           <input
+            id="name"
             type="text"
             name="name"
             required
@@ -48,8 +49,9 @@
           >
 
           <textarea
+            id="description"
             rows="5"
-            name="message"
+            name="description"
             class="w-full px-3 py-2 placeholder-gray-300 bg-gray-200 border border-gray-300 rounded-md  focus:outline-none focus:ring focus:ring-indigo-100 focus:border-indigo-300"
             required
           ></textarea>
@@ -67,5 +69,53 @@
   </div>
 </div>
 
+
+<script>
+  // Récupérer le formulaire
+  const projetForm = document.getElementById('formProjet');
+
+  // Ajouter un gestionnaire d'événement pour l'événement de soumission du formulaire
+  projetForm.addEventListener('submit', async (event) => {
+      event.preventDefault(); // Empêcher le comportement par défaut du formulaire
+
+      // Récupérer les valeurs des champs de formulaire
+      const nameProjet = document.getElementById('name').value;
+      const desProjet = document.getElementById('description').value;
+
+      // Créer un objet avec les données de l'utilisateur
+      const DataProjet = {
+          nameProjet,
+          desProjet
+      };
+
+      try {
+          // Envoyer une requête POST à l'API pour l'inscription
+          const response = await fetch('http://localhost:5000/api/addProjet', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(DataProjet)
+          });
+
+          // Vérifier le code de statut de la réponse
+      if (response.ok) {
+          alert("Projet créé avec succès");
+          // Réinitialiser les valeurs des champs du formulaire à une chaîne vide
+          document.getElementById('name').value = '';
+          document.getElementById('description').value = '';
+
+          
+          window.location.href = '/views/home';
+      }  else {
+              const responseData = await response.json();
+              alert("erreur lors de la creation du projet 1: " + responseData.message);
+          }
+      } catch (error) {
+          console.error("Erreur lors de la requête 2:", error);
+          alert("Erreur lors de la creation du projet. Veuillez réessayer.");
+      }
+  });
+</script>
 </body>
 </html>

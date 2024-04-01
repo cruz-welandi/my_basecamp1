@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.post("/addProjet", projetController.addProjet);
 router.put("/updateProjet", projetController.updateProjet);
-router.get("/listProjet", projetController.listProject);
+router.get("/listProjet", projetController.listProjet);
 router.post("/addUserToProject", projetController.addUserToProject);
 
 module.exports = router;

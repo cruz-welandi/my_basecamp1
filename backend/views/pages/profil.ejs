@@ -8,7 +8,7 @@
 </head>
 <body>
     <nav class="flex py-3 justify-between px-5">
-        <a href="/views/Projet">
+        <a href="/views/home">
             <img class="w-[70px]" src="/views/assets/logo.png" alt="logo" >
           </a>            
             <div class="flex gap-5">
@@ -22,28 +22,37 @@
                <a href="/views/profil" class="bg-gray-200 font-bold flex items-center px-4 py-2 gap-2 rounded-lg">Profil<img src="/views/assets/parametres-cog.png " class="w-[20px] " alt="Profil"></a>
             </div>
         </nav>
-    
-        <div class="">
-            <span class="text-3xl font-bold flex pl-[40%] py-2">Profil</span>
-            <div class="flex flex-col gap-2 ml-[20em] py-10">
-                <label class="text-xl ">Name</label>
-                <input type="text" name="Username" id="Username" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
-                <label class="text-xl ">Email</label>
-                <input type="email" name="Email" id="Email" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
-                <label class="text-xl ">Password </label>
-                <input type="password" name="Password" id="Password" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
-                <label class="text-xl ">Confirm Password </label>
-                <input type="password" name="Password" id="Password" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
+        
+        <form action="" class="flex flex-col gap-y-5 p-4 items-center shadow rounded-lg bg-white w-[700px] mx-auto my-28">
+          <div>
+            <label class="text-3xl text-center">
+              Upate Profil
+            </label>
+          </div>
+          <div class="flex gap-x-3">
+            <div class="flex flex-col">
+              <label class="text-xl ">Name</label>
+              <input type="text" name="Username" id="Username" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
             </div>
+            <div  class="flex flex-col">
+              <label class="text-xl ">Email</label>
+              <input type="email" name="Email" id="Email" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
+            </div>
+          </div>
 
-            <div class="mb-6 ml-[23em]">
-                <button
-                  type="update"
-                  class=" px-14 py-2 text-white text-xl bg-[#02A9F6] rounded-md  focus:bg-indigo-600 focus:outline-none"
-                >
-                Update        
-              </button>
+          <div  class="flex gap-x-3">
+            <div class="flex flex-col">
+              <label class="text-xl ">Password </label>
+              <input type="password" name="Password" id="Password" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
             </div>
-        </div>
+            <div class="flex flex-col">
+              <label class="text-xl ">Confirm Password </label>
+              <input type="password" name="Password" id="Password" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
+            </div>   
+          </div>
+          <button type="update" class="flex justify-center items-center px-14 py-2 text-white text-xl bg-[#02A9F6] rounded-md  focus:bg-indigo-600 focus:outline-none">
+            Update        
+          </button>
+        </form>
 </body>
 </html>

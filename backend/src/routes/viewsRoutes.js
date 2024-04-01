@@ -21,8 +21,8 @@ viewsRouter.get('/register', (req, res) => {
 });
 
 //view projets
-viewsRouter.get('/projet', (req, res) => {
-    res.render('Projet', { title: 'create projet'});
+viewsRouter.get('/home', (req, res) => {
+    res.render('Projet', { title: 'home'});
 });
 
 //view new-project
