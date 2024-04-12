@@ -11,8 +11,7 @@ const auth = async (req, res, next) => {
             throw new Error();
         }
 
-        req.user = user; // Ajouter les informations de l'utilisateur à req.user
-        req.token = token;
+        req.user = user; // Cela devrait définir req.user
         next();
     } catch (error) {
         res.status(401).json({ error: 'Non autorisé' });

@@ -23,24 +23,24 @@
         </div>
     </nav>
 
-      <div class="max-w-xl p-5 mx-auto mt-20 bg-white rounded-md shadow">
+      <div class="max-w-xl p-5 mx-auto mt-14 bg-white rounded-md shadow">
         <div class="flex justify-center gap-60 mb-5">
           <h1 class="font-bold text-3xl flex py-3s">Edit projet</h1>
         </div>
         <div>
          <div class="max-w-2xl mx-auto bg-white ">
 
-          <form class="flex gap-y-6 flex-col mx-auto">
+          <form class="flex gap-y-6 flex-col mx-auto" id="updateForm">
 
             <div>
               <label for="name" class="block mb-2 text-xl">Current Name of Project</label>
-              <input type="text" id="first_name" class="bg-gray-200 border border-gray-300  rounded-lg block w-full p-2.5 " placeholder="" required>
+              <input type="text" id="currentName" name="currentName" class="bg-gray-200 border border-gray-300  rounded-lg block w-full p-2.5 " placeholder="" required>
             </div>
             
             <div class="flex gap-x-6">
               <div>
                 <label for="name" class="block mb-2 text-xl">Name</label>
-                <input type="text" id="first_name" class="bg-gray-200 border border-gray-300  rounded-lg block w-[250px] p-2.5 " placeholder="" required>
+                <input type="text" id="nameProjet" name="nameProjet" class="bg-gray-200 border border-gray-300  rounded-lg block w-[250px] p-2.5 " placeholder="" required>
               </div>
             
               <div>
@@ -50,6 +50,8 @@
                   name="message"
                   class="w-[250px] px-3 py-2 placeholder-gray-300 bg-gray-200 border border-gray-300 rounded-md  focus:outline-none focus:ring focus:ring-indigo-100 focus:border-indigo-300"
                   required
+                  id="desProjet"
+                  name="desProjet"
                 ></textarea>
               </div> 
             </div> 
@@ -57,13 +59,13 @@
             <div class="flex gap-6 w-full">
               <div>
                   <label for="email" class="block mb-2 text-xl">Add a member (email)</label>
-                  <input type="email" id="website" class="bg-gray-200 border border-gray-300 rounded-lg block w-[250px] p-2.5">
+                  <input type="email" id="email" name="email" class="bg-gray-200 border border-gray-300 rounded-lg block w-[250px] p-2.5">
               </div>
               <div class="flex items-center gap-2">
                 <div class="flex mt-12 gap-4">
                   <h5>Admin</h5>
                   <label class="relative inline-flex items-center mb-5 cursor-pointer">
-                    <input type="checkbox" value="" class="sr-only peer">
+                    <input type="checkbox" id="role" name="role" class="sr-only peer">
                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                   </label>
                 </div>
@@ -78,5 +80,62 @@
          </div>
         </div>
       </div>
+
+      <script>
+          // Récupérer le formulaire
+          const updateForm = document.getElementById('updateForm');
+
+          // Ajouter un gestionnaire d'événement pour l'événement de soumission du formulaire
+          updateForm.addEventListener('submit', async (event) => {
+              event.preventDefault(); // Empêcher le comportement par défaut du formulaire
+
+              // Récupérer les valeurs des champs de formulaire
+              const nameProjet = document.getElementById('nameProjet').value;
+              const Email = document.getElementById('email').value;
+              const desProjet = document.getElementById('desProjet').value;
+              const currentNameProjet = document.getElementById('currentName').value;
+              const role = document.getElementById('role').value;
+
+              // Créer un objet avec les données de l'utilisateur
+              const projetData = {
+                 currentNameProjet,
+                 nameProjet,
+                 desProjet,
+                 Email,
+                 role
+              };
+              console.log(projetData)
+              try {
+                  // Envoyer une requête POST à l'API pour l'inscription
+                  const response = await fetch('http://localhost:5000/api/updateProjet', {
+                      method: 'PUT',
+                      headers: {
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify(projetData)
+                  });
+
+                  console.log(response.json)
+                  // Vérifier le code de statut de la réponse
+              if (response.ok) {
+                  alert("Mise à jour éffectué avec succès");
+                  // Réinitialiser les valeurs des champs du formulaire à une chaîne vide
+                  document.getElementById('nameProjet').value = '';
+                  document.getElementById('email').value ='';
+                  document.getElementById('desProjet').value ='';
+                  document.getElementById('currentName').value ='';
+                  document.getElementById('role').value ='';
+
+                  window.location.href = '/views/home';
+              }  else {
+                      const responseData = await response.json();
+                      alert("Erreur lors de la mise à jour : " + responseData.message);
+                  }
+              } catch (error) {
+                  console.error("Erreur lors de la requête :", error);
+                  alert("Erreur lors de la mise à jour. Veuillez réessayer.");
+              }
+          });
+      </script>
 </body>
 </html>

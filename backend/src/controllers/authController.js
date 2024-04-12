@@ -131,6 +131,7 @@ const register = async (req, res) => {
 //route pour mettre à jour les information de l'utilisateur
 
 const updateUser = async (req, res) => {
+    console.log("debut updateUser")
     try {
         const token = req.cookies.userToken;
         console.log("Token reçu!"); // Pour vérifier le token reçu

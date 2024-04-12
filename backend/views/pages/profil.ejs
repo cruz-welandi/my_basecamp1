@@ -23,7 +23,7 @@
             </div>
         </nav>
         
-        <form action="" class="flex flex-col gap-y-5 p-4 items-center shadow rounded-lg bg-white w-[700px] mx-auto my-28">
+        <form id="updateForm" action="" class="flex flex-col gap-y-5 p-4 items-center shadow rounded-lg bg-white w-[700px] mx-auto my-28">
           <div>
             <label class="text-3xl text-center">
               Upate Profil
@@ -47,12 +47,70 @@
             </div>
             <div class="flex flex-col">
               <label class="text-xl ">Confirm Password </label>
-              <input type="password" name="Password" id="Password" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
+              <input type="password" name="ConfirmPassword" id="ConfirmPassword" class="border w-[18em] rounded-lg bg-gray-200 px-2 py-2" placeholder="">
             </div>   
           </div>
           <button type="update" class="flex justify-center items-center px-14 py-2 text-white text-xl bg-[#02A9F6] rounded-md  focus:bg-indigo-600 focus:outline-none">
             Update        
           </button>
         </form>
+        <script>
+                  // Récupérer le formulaire
+              const updateForm = document.getElementById('updateForm');
+
+              // Ajouter un gestionnaire d'événement pour l'événement de soumission du formulaire
+              updateForm.addEventListener('submit', async (event) => {
+                  event.preventDefault(); // Empêcher le comportement par défaut du formulaire
+
+                  // Récupérer les valeurs des champs de formulaire
+                  const Username = document.getElementById('Username').value;
+                  const Email = document.getElementById('Email').value;
+                  const Password = document.getElementById('Password').value;
+                  const confirmPassword = document.getElementById('ConfirmPassword').value;
+
+                  // Vérifier si les mots de passe correspondent
+                  if (Password !== confirmPassword) {
+                      alert("Les mots de passe ne correspondent pas.");
+                      return;
+                  }
+
+                  // Créer un objet avec les données de l'utilisateur
+                  const userData = {
+                      Username,
+                      Email,
+                      Password
+                  };
+
+                  try {
+                      // Envoyer une requête POST à l'API pour l'inscription
+                      const response = await fetch('http://localhost:5000/api/updateUser', {
+                          method: 'PUT',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          body: JSON.stringify(userData)
+                      });
+
+                      // Vérifier le code de statut de la réponse
+                  if (response.ok) {
+                      // Réinitialiser les valeurs des champs du formulaire à une chaîne vide
+                      document.getElementById('Username').value = '';
+                      document.getElementById('Email').value = '';
+                      document.getElementById('Password').value = '';
+                      document.getElementById('ConfirmPassword').value = '';
+
+                      
+                      window.location.reload();
+                      alert("Mise à jour éffectuer avec succès");
+                  }  else {
+                          const responseData = await response.json();
+                          alert("Erreur lors de l'inscription : " + responseData.message);
+                      }
+                  } catch (error) {
+                      console.error("Erreur lors de la requête :", error);
+                      alert("Erreur lors de l'inscription. Veuillez réessayer.");
+                  }
+              });
+        </script>
 </body>
 </html>

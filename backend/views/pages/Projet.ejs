@@ -41,11 +41,38 @@
         </div>
       </div>
     <script>
+
+                async function deleteProjet(projetId) {
+                    try {
+                        const responseDelete = await fetch(`http://localhost:5000/api/deleteProjet`, {
+                            method: 'DELETE', 
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            credentials: 'include',
+                            body: JSON.stringify({ projectId: projetId })
+                        });
+
+                        if (!responseDelete.ok) { // Vérification si la requête n'a pas réussi
+                            throw new Error('Échec de la suppression du projet');
+                        }
+
+                        const result = await responseDelete.json();
+                         
+                        window.location.reload();
+                        alert("Projet supprimé avec succès !");
+                        
+
+                    } catch (error) {
+                        console.error("Erreur lors de la suppression du projet", error);
+                        alert("Erreur lors de la suppression du projet : " + error.message);
+                    }
+                }
+
         async function fetchAndDisplayProjects() {
             try {
                 const response = await fetch('http://localhost:5000/api/listProjet');
                 const { userProjects, projectsAddedTo } = await response.json();
-
                 // Sélecteur pour les conteneurs
                 const userProjectsContainer = document.getElementById('userProjectsContainer');
                 const projectsAddedToContainer = document.getElementById('projectsAddedToContainer');
@@ -53,11 +80,23 @@
                 // Mapper et afficher userProjects
                 userProjects.forEach(project => {
                     const projectElement = document.createElement('div');
-                    projectElement.classList.add('p-4', 'mb-4', 'shadow', 'rounded-lg', 'bg-white'); // Tailwind classes
+                    projectElement.classList.add('p-4', 'mb-4', 'shadow', 'rounded-lg', 'bg-white', 'w-[230px]', 'grid', 'grid-clos-6'); // Tailwind classes
+                    // Icône SVG de suppression
+                    const deleteIconSVG = projectId => `
+                            <button onclick='deleteProjet(${projectId})'>
+                                <svg class="fill-current text-red-500 hover:text-red-700 cursor-pointer" width="24" height="24" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <title>Supprimer</title>
+                                    <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 12.196l-2.651 2.653a1.2 1.2 0 1 1-1.697-1.697L8.303 10.5 5.651 7.848a1.2 1.2 0 1 1 1.697-1.697L10 8.803l2.651-2.652a1.2 1.2 0 1 1 1.697 1.697L11.697 10.5l2.651 2.651a1.2 1.2 0 0 1 0 1.698z"/>
+                                </svg>
+                            </button>    
+                    `;
                     projectElement.innerHTML = `
-                        <h3 class="text-lg font-bold">${project.nameProjet}</h3>
+                        <div class="flex justify-between">
+                            <h3 class="text-lg font-bold mb-2">${project.nameProjet}</h3>
+                            ${deleteIconSVG(project.Id)}
+                        </div>
                         <p>${project.desProjet}</p>
-                        <p class="text-sm text-gray-600">Créé par: ${project.Email}</p>
+                        <p class="text-sm text-gray-600 mt-2">Créé par: ${project.Email} ${project.Id}</p>
                     `;
                     userProjectsContainer.appendChild(projectElement);
                 });
@@ -65,11 +104,24 @@
                 // Mapper et afficher projectsAddedTo
                 projectsAddedTo.forEach(project => {
                     const projectElement = document.createElement('div');
-                    projectElement.classList.add('p-4', 'mb-4', 'shadow', 'rounded-lg', 'bg-white'); // Tailwind classes
+                    projectElement.classList.add('p-4', 'mb-4', 'shadow', 'rounded-lg', 'bg-white', 'w-[230px]'); // Tailwind classes
+                    // Icône SVG de suppression
+                    const deleteIconSVG = projectId => `
+                            <button onclick="deleteProjet(${projectId})">
+                                <svg class="fill-current text-red-500 hover:text-red-700 cursor-pointer" width="24" height="24" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <title>Supprimer</title>
+                                    <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 12.196l-2.651 2.653a1.2 1.2 0 1 1-1.697-1.697L8.303 10.5 5.651 7.848a1.2 1.2 0 1 1 1.697-1.697L10 8.803l2.651-2.652a1.2 1.2 0 1 1 1.697 1.697L11.697 10.5l2.651 2.651a1.2 1.2 0 0 1 0 1.698z"/>
+                                </svg>
+                            </button>    
+                        `;
+
                     projectElement.innerHTML = `
-                        <h3 class="text-lg font-bold">${project.nameProjet}</h3>
+                        <div class="flex justify-between">
+                            <h3 class="text-lg font-bold mb-2">${project.nameProjet}</h3>
+                            ${deleteIconSVG(project.Id)}
+                        </div>
                         <p>${project.desProjet}</p>
-                        <p class="text-sm text-gray-600">Créé par: ${project.Email}</p>
+                        <p class="text-sm text-gray-600 mt-2">Créé par: ${project.Email}</p>
                     `;
                     projectsAddedToContainer.appendChild(projectElement);
                 });
@@ -79,7 +131,7 @@
             }
         }
 
-        // Appeler la fonction au chargement de la page
+        
         fetchAndDisplayProjects();
     </script>
 </body>

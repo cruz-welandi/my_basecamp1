@@ -35,8 +35,13 @@ app.use((req, res, next) => {
   next();
 });
 
+const corsOptions = {
+  origin: 'http://localhost:5000',
+  credentials: true, 
+  methods: ['GET', 'POST', 'PUT', 'DELETE']
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 // Middleware pour analyser le corps des requêtes au format URL encodé
 app.use(express.urlencoded({ extended: true }));

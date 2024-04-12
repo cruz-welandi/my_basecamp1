@@ -1,6 +1,7 @@
 const dbModels = require('../models/dbModels');
 const jwt = require('jsonwebtoken');
 
+
 const addProjet = async (req, res) => {
     console.log("Début de la fonction addProjet"); // Pour confirmer l'entrée dans la fonction
 
@@ -75,29 +76,93 @@ const updateProjet = async (req, res) => {
     console.log("ID du créateur"); // Pour vérifier l'ID extrait du token
 
 
-    const { nameProjet, desProjet, email, role } = req.body;
+    const { currentNameProjet, nameProjet, desProjet, email, role } = req.body;
     // Validation des données
-    if (!userId || !nameProjet || !desProjet || !email || !role){
+    /*if (!userId || !nameProjet || !desProjet || !email || !role){
         return res.status(400).json({ message: "L'identifiant du projet, le nom et la description du projet sont requis pour la mise à jour." });
-    }
-    
+    }*/
+    console.log(currentNameProjet + "\n"+ userId)
+
+    /*function getProjectIdByName(name) {
+        return new Promise((resolve, reject) => {
+            dbModels.get(`SELECT Id FROM Projets WHERE nameProjet = ?`, [name], (err, row) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    }*/
 
     try {
+
+        const getProjetIdByName = (name) => new Promise((resolve, reject) => {
+            dbModels.get(`SELECT Id FROM Projets WHERE nameProjet = ?`, [name], (err, row) => {
+                if (err) {
+                    reject(err);
+                } else if (row) {
+                    resolve(row.Id);
+                } else {
+                    resolve(null);
+                }
+            });
+        });
+
+        const projetId = await getProjetIdByName(currentNameProjet);
+        console.log(projetId)
+
+        if (!projetId) {
+            return res.status(404).json({ message: "Projet introuvable." });
+        }
+
+        
         // Mise à jour du projet
         const date = new Date();
         const dateProjet = `${date.getFullYear()}:${date.getMonth() + 1}:${date.getDate()}`;
-        const sql = `UPDATE Projets SET nameProjet = ?, desProjet = ?, DateCreated = ? WHERE id = ?`;
-        const params = [nameProjet, desProjet, dateProjet, userId];
 
-        await dbModels.run(sql, params);
+        const runQuery = (sql, params) => new Promise((resolve, reject) => {
+            dbModels.run(sql, params, function(err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(this.changes);
+                    if (this.changes === 0) {
+                        return res.status(404).json({ message: "Aucun projet trouvé avec l'identifiant spécifié." });
+                    }
+                }
+            });
+        });
 
-        // Vérification de l'effet de la mise à jour
-        const updatedRows = this.changes;
-        if (updatedRows === 0) {
-            return res.status(404).json({ message: "Aucun projet trouvé avec l'identifiant spécifié." });
+        console.log(desProjet)
+
+        if(nameProjet != "" && desProjet==""){
+            const sql = `UPDATE Projets SET nameProjet = ?, DateCreated = ? WHERE id = ?`;
+            const params = [nameProjet, dateProjet, projetId];
+
+            await runQuery(sql, params);
+
+            return res.status(200).json({ message: "Le nom du projet ont été mis à jour avec succès." });
+
+        } else if(desProjet != "" && nameProjet == ""){
+
+            const sql = `UPDATE Projets SET desProjet = ?, DateCreated = ? WHERE id = ?`;
+            const params = [desProjet, dateProjet, projetId];
+
+            await runQuery(sql, params);
+
+            return res.status(200).json({ message: "La description du projet ont été mis à jour avec succès." });
+
+        } else if(nameProjet != "" && desProjet != ""){
+
+            const sql = `UPDATE Projets SET nameProjet = ?, desProjet = ?, DateCreated = ? WHERE id = ?`;
+            const params = [nameProjet, desProjet, dateProjet, projetId];
+
+            await runQuery(sql, params);
+
+            return res.status(200).json({ message: "Le nom et la description du projet ont été mis à jour avec succès." });
         }
-
-        return res.status(200).json({ message: "Le nom et la description du projet ont été mis à jour avec succès." });
+        
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: "Erreur interne du serveur." });
@@ -135,14 +200,14 @@ const listProjet = async (req, res) => {
 
     try {
         // Sélectionnez le nom du projet, la description et l'email du créateur pour tous les projets créés par l'utilisateur
-        const sql = `SELECT Projets.nameProjet, Projets.desProjet, Users.Email 
+        const sql = `SELECT Projets.Id, Projets.nameProjet, Projets.desProjet, Users.Email 
                      FROM Projets 
                      JOIN Users ON Projets.CreatorId = Users.Id 
                      WHERE Projets.CreatorId = ?`;
         const userProjects = await runQuery(sql, [userId]);
 
         // Sélectionnez le nom du projet, la description et l'email du créateur pour tous les projets où l'utilisateur a été ajouté
-        const sql2 = `SELECT Projets.nameProjet, Projets.desProjet, Users.Email 
+        const sql2 = `SELECT Projets.Id, Projets.nameProjet, Projets.desProjet, Users.Email 
                       FROM Projets 
                       JOIN ProjetMembers ON Projets.Id = ProjetMembers.ProjetId 
                       JOIN Users ON Projets.CreatorId = Users.Id 
@@ -195,10 +260,49 @@ const addUserToProject = async (req, res) => {
     }
 };
 
+const deleteProjet = async (req, res) => {
+    console.log("Début de la fonction deleteProjet");
+    const { projectId } = req.body;
+
+    try {
+        const projectExistsQuery = "SELECT 1 FROM Projets WHERE Id = ?";
+        const project = await dbModels.get(projectExistsQuery, [projectId]);
+        if (!project) {
+            return res.status(404).json({ message: "Projet non trouvé." });
+        }
+
+        dbModels.serialize(() => {
+            dbModels.run("BEGIN TRANSACTION;");
+            dbModels.run("DELETE FROM Projets WHERE Id = ?", [projectId], function (err) {
+                if (err) {
+                    dbModels.run("ROLLBACK;");
+                    console.error("Erreur lors de la suppression du projet:", err);
+                    res.status(500).json({ message: "Erreur interne du serveur.", error: err.message });
+                } else {
+                    dbModels.run("DELETE FROM ProjetMembers WHERE ProjetId = ?", [projectId], function (err) {
+                        if (err) {
+                            dbModels.run("ROLLBACK;");
+                            console.error("Erreur lors de la suppression des membres du projet:", err);
+                            res.status(500).json({ message: "Erreur interne du serveur.", error: err.message });
+                        } else {
+                            dbModels.run("COMMIT;");
+                            res.status(200).json({ message: "Le projet a été supprimé avec succès." });
+                        }
+                    });
+                }
+            });
+        });
+    } catch (error) {
+        console.error("Erreur lors de la suppression du projet:", error);
+        res.status(500).json({ message: "Erreur interne du serveur.", error: error.message });
+    }
+};
+
 
 module.exports = {
     addProjet,
     updateProjet,
     listProjet,
     addUserToProject,
+    deleteProjet
 };
